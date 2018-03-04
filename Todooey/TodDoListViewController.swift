@@ -34,7 +34,7 @@ class TodDoListViewController : UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print (itemArray[indexPath.row])
-        // add chck mark if there isn't one, else get rid
+        // add check mark if there isn't one, else get rid
         
         if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{
             tableView.cellForRow(at: indexPath)?.accessoryType = .none
