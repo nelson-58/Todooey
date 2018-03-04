@@ -12,9 +12,19 @@ class TodDoListViewController : UITableViewController {
 
     var itemArray = ["Find Mike", "Buy eggs", "blaa bla"]
     
+    let defaults = UserDefaults.standard
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        //Retreive data from userdefaults memory
+        //Data is saved in a dictionary collection using Key "TodoListArray". The data itself of string type
+        //and will be extracted into an array
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            //copy into the itemArray which is used by the app to display stuff to the tableview
+            itemArray = items
+        }
     }
 
     // MARK - TableView DataSource Methods
@@ -63,6 +73,8 @@ class TodDoListViewController : UITableViewController {
             self.itemArray.append(textField.text!)
             //update tableview from the itemArray
             self.tableView.reloadData()
+            //save in user defaults
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
 
         }
         //Add a text field in the popup to capture the todo
