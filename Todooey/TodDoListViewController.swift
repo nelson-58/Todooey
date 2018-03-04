@@ -19,8 +19,7 @@ class TodDoListViewController : UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         //Retreive data from userdefaults memory
-        //Data is saved in a dictionary collection using Key "TodoListArray". The data itself of string type
-        //and will be extracted into an array
+        //to do items is saved as an array of String items in User Defaults under the Key "TodoListArray". 
         if let items = defaults.array(forKey: "TodoListArray") as? [String] {
             //copy into the itemArray which is used by the app to display stuff to the tableview
             itemArray = items
