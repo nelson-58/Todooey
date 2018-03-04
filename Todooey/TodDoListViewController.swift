@@ -10,7 +10,7 @@ import UIKit
 
 class TodDoListViewController : UITableViewController {
 
-    let itemArray = ["Find Mike", "Buy eggs", "blaa bla"]
+    var itemArray = ["Find Mike", "Buy eggs", "blaa bla"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,9 +46,40 @@ class TodDoListViewController : UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    override func tableView(_ tableView: UITableView, performAction action: Selector, forRowAt indexPath: IndexPath, withSender sender: Any?) {
+    //MARK - add new items
+    @IBAction func addButtonPressed(_ sender: Any) {
+        
+        var textField = UITextField()
+        //need brackets to initialse the variable
+        
+        //pop up an UIAlert style dialogue box when the Add button is pressed
+        let alert = UIAlertController(title: "Add New ToDoey Item", message: "", preferredStyle: .alert)
+        //Define the action button ("Add Item") in the popup, and refer to the action to take place when "Add Item"
+        //is pressed
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            //what will happen once the user clicks the add item on our UI alert ....
+            //Add new item to the itemArray
+            //textField is a reference to the popup textfield
+            self.itemArray.append(textField.text!)
+            //update tableview from the itemArray
+            self.tableView.reloadData()
+
+        }
+        //Add a text field in the popup to capture the todo
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            //Point "trextField" at alertTextField. This sets up a REFERENCE to the alertTextField.
+            //textField has got scope across the whole function
+            textField = alertTextField
+            
+        }
+        // add the action "action" to happen when the button is pressed in the UIalert dialogue box
+        alert.addAction(action)
+        //Finally, you actually have to show the dialogue box
+        present(alert, animated: true, completion: nil)
         
     }
+    
     
     
 
