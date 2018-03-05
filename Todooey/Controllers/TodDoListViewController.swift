@@ -15,23 +15,28 @@ class TodDoListViewController : UITableViewController {
     //***
     var itemArray = [Item]()
     
-    let defaults = UserDefaults.standard
+    // Set up a new plist in the same directory allocated to the app
+    //this is currently in the file system on the laptop
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        // Do any additional setup after loading the view
+        
+        loadItems()
+        /*
+         let newTodo = Item()
+        newTodo.title = "first todo"
+        itemArray.append(newTodo)
+         */
+
         //Retreive data from User Defaults memory
         //to do items are saved as an array of items of class Item in User Defaults under the Key "TodoListArray".
         //***
-        
-        let newTodo = Item()
-        newTodo.title = "first todo"
-        itemArray.append(newTodo)
-
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            //copy into the itemArray which is used by the app to display stuff to the tableview
-            itemArray = items
-        }
+//        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
+//            //copy into the itemArray which is used by the app to display stuff to the tableview
+//            itemArray = items
+//        }
     }
 
     // MARK - TableView DataSource Methods
@@ -53,14 +58,8 @@ class TodDoListViewController : UITableViewController {
         cell.accessoryType = item.done ? .checkmark : .none
         /* same as saying
         cell.accessoryType = item.done == true ? .checkmark : .none
-        or
-        if item.done == true {
-            cell.accessoryType = .checkmark
-        }
-        else {
-            cell.accessoryType = .none
-        }
         */
+        saveItems()
 
         return cell
  
@@ -76,6 +75,7 @@ class TodDoListViewController : UITableViewController {
         //toggle the "done" setting in the item
         //
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        saveItems()
         self.tableView.reloadData()
         
         // turn off highlighting of selected cell ... looks nicer
@@ -103,11 +103,11 @@ class TodDoListViewController : UITableViewController {
             newItem.title = textField.text!
             self.itemArray.append(newItem)
             
-            //save in user defaults
-            //failing here
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            //Was failing here, trying to save in user defaults. iOS doesn't like using USerDefaults for saving an array
             //self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
+            // User alternative method, encoding data into the file system
+            self.saveItems()
             //update tableview from the itemArray
             self.tableView.reloadData()
 
@@ -127,8 +127,37 @@ class TodDoListViewController : UITableViewController {
         
     }
     
+    func saveItems() {
+        // get a encoder object of type plist ("Property List")
+        let encoder = PropertyListEncoder()
+        do {
+            //encode the itemArray objects
+            let data = try encoder.encode(itemArray)
+            // drite them to the folder specified by dataFilePath (set when the TableViewController is initialised)
+            try data.write(to: dataFilePath!)
+        }
+        catch {
+            print("Error encoding item array,  \(error)")
+        }
+       
+    }
     
-    
+    func loadItems() {
+        
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            
+            // get a decoder object of type plist ("Property List")
+            let decoder = PropertyListDecoder()
+            do {
+                //decode the contents of "data" (from Data() above)
+                //and put it into itemArray
+                itemArray = try decoder.decode([Item].self, from:data)
+            }
+            catch {
+                print("Error decoding item array \(error)")
+            }
+        }
+    }
 
 }
 

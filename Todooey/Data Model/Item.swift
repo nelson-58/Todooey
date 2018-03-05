@@ -10,7 +10,7 @@ import Foundation
 
 //generate a class which holds the info on each to do
 
-class Item {
+class Item : Codable {
     
     var title : String = ""
     var done : Bool = false
