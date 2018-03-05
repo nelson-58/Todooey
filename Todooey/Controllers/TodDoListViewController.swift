@@ -10,17 +10,25 @@ import UIKit
 
 class TodDoListViewController : UITableViewController {
 
-    var itemArray = ["Find Mike", "Buy eggs", "blaa bla"]
+    //var itemArray = ["Find Mike", "Buy eggs", "blaa bla"]
+    //Now it becomes an array of objects of class Item and are initialsied
+    //***
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        //Retreive data from userdefaults memory
-        //to do items is saved as an array of String items in User Defaults under the Key "TodoListArray". 
-        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+        //Retreive data from User Defaults memory
+        //to do items are saved as an array of items of class Item in User Defaults under the Key "TodoListArray".
+        //***
+        
+        let newTodo = Item()
+        newTodo.title = "first todo"
+        itemArray.append(newTodo)
+
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
             //copy into the itemArray which is used by the app to display stuff to the tableview
             itemArray = items
         }
@@ -33,26 +41,46 @@ class TodDoListViewController : UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row]
-        return cell
         
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        //***
+        
+        let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        
+        // ternary operator
+        // value = condition ? valueIfTrue : valueIfFalse
+        cell.accessoryType = item.done ? .checkmark : .none
+        /* same as saying
+        cell.accessoryType = item.done == true ? .checkmark : .none
+        or
+        if item.done == true {
+            cell.accessoryType = .checkmark
+        }
+        else {
+            cell.accessoryType = .none
+        }
+        */
+
+        return cell
+ 
     }
     
     // MARK - TableView delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print (itemArray[indexPath.row])
-        // add check mark if there isn't one, else get rid
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }
-        else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        //***
+        //    print (itemArray[indexPath.row].title)
+        //***
+        //toggle the "done" setting in the item
+        //
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        self.tableView.reloadData()
+        
         // turn off highlighting of selected cell ... looks nicer
         tableView.deselectRow(at: indexPath, animated: true)
+        
     }
     
     //MARK - add new items
@@ -69,15 +97,23 @@ class TodDoListViewController : UITableViewController {
             //what will happen once the user clicks the add item on our UI alert ....
             //Add new item to the itemArray
             //textField is a reference to the popup textfield
-            self.itemArray.append(textField.text!)
+            //*** self.itemArray.append(textField.text!)
+            // New version: create a new object
+            let newItem = Item()
+            newItem.title = textField.text!
+            self.itemArray.append(newItem)
+            
+            //save in user defaults
+            //failing here
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            //self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            
             //update tableview from the itemArray
             self.tableView.reloadData()
-            //save in user defaults
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
 
         }
         //Add a text field in the popup to capture the todo
-        alert.addTextField { (alertTextField) in
+            alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new item"
             //Point "trextField" at alertTextField. This sets up a REFERENCE to the alertTextField.
             //textField has got scope across the whole function
