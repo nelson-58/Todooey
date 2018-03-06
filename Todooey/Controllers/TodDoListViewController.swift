@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class TodDoListViewController : UITableViewController {
 
@@ -15,30 +16,20 @@ class TodDoListViewController : UITableViewController {
     //***
     var itemArray = [Item]()
     
-    // Set up a new plist in the same directory allocated to the app
-    //this is currently in the file system on the laptop
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    //UIApplication.shared refers to the current app
+    //UIApplication.shared.delegate as! AppDelegate gives us access to the app delegate as an object
+    //then we can access the context (viewcontext) of the Persistent Store
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view
         
+        //Fetch all the data out of Core Data context and load up itemArray
         loadItems()
-        /*
-         let newTodo = Item()
-        newTodo.title = "first todo"
-        itemArray.append(newTodo)
-         */
-
-        //Retreive data from User Defaults memory
-        //to do items are saved as an array of items of class Item in User Defaults under the Key "TodoListArray".
-        //***
-//        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-//            //copy into the itemArray which is used by the app to display stuff to the tableview
-//            itemArray = items
-//        }
     }
-
+    
     // MARK - TableView DataSource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -56,11 +47,7 @@ class TodDoListViewController : UITableViewController {
         // ternary operator
         // value = condition ? valueIfTrue : valueIfFalse
         cell.accessoryType = item.done ? .checkmark : .none
-        /* same as saying
-        cell.accessoryType = item.done == true ? .checkmark : .none
-        */
-        saveItems()
-
+        
         return cell
  
     }
@@ -69,14 +56,18 @@ class TodDoListViewController : UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        //***
-        //    print (itemArray[indexPath.row].title)
-        //***
-        //toggle the "done" setting in the item
-        //
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        //Example of update
+        // if we want to update all titles to "completed":
+        //itemArray[indexPath.row].setValue("completed", forKey: "title")
+        
+        //if we want to remove NSmanagedobject from context
+        // context.delete(itemArray[indexPath.row])
+        //then (and only then) remove current item from data array
+        //itemArray.remove(at: indexPath.row)
+        
         saveItems()
-        self.tableView.reloadData()
         
         // turn off highlighting of selected cell ... looks nicer
         tableView.deselectRow(at: indexPath, animated: true)
@@ -94,26 +85,20 @@ class TodDoListViewController : UITableViewController {
         //Define the action button ("Add Item") in the popup, and refer to the action to take place when "Add Item"
         //is pressed
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
-            //what will happen once the user clicks the add item on our UI alert ....
-            //Add new item to the itemArray
-            //textField is a reference to the popup textfield
-            //*** self.itemArray.append(textField.text!)
-            // New version: create a new object
-            let newItem = Item()
+           
+            //create a new item based on the Item entity which is an NSManagedObject
+            //This item is created in the Context area
+            let newItem = Item(context: self.context)
             newItem.title = textField.text!
+            newItem.done = false
             self.itemArray.append(newItem)
             
-            //Was failing here, trying to save in user defaults. iOS doesn't like using USerDefaults for saving an array
-            //self.defaults.set(self.itemArray, forKey: "TodoListArray")
-            
-            // User alternative method, encoding data into the file system
             self.saveItems()
-            //update tableview from the itemArray
-            self.tableView.reloadData()
+            
 
         }
         //Add a text field in the popup to capture the todo
-            alert.addTextField { (alertTextField) in
+        alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new item"
             //Point "trextField" at alertTextField. This sets up a REFERENCE to the alertTextField.
             //textField has got scope across the whole function
@@ -128,36 +113,61 @@ class TodDoListViewController : UITableViewController {
     }
     
     func saveItems() {
-        // get a encoder object of type plist ("Property List")
-        let encoder = PropertyListEncoder()
+        
         do {
-            //encode the itemArray objects
-            let data = try encoder.encode(itemArray)
-            // drite them to the folder specified by dataFilePath (set when the TableViewController is initialised)
-            try data.write(to: dataFilePath!)
+            //save the context in Persistent Data
+            try context.save()
+            //update tableview from the itemArray
+            self.tableView.reloadData()
         }
         catch {
-            print("Error encoding item array,  \(error)")
+            print("Error saving context,  \(error)")
         }
        
     }
     
-    func loadItems() {
+    func loadItems(with request:NSFetchRequest<Item> = Item.fetchRequest()) {
         
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            
-            // get a decoder object of type plist ("Property List")
-            let decoder = PropertyListDecoder()
-            do {
-                //decode the contents of "data" (from Data() above)
-                //and put it into itemArray
-                itemArray = try decoder.decode([Item].self, from:data)
-            }
-            catch {
-                print("Error decoding item array \(error)")
-            }
-        }
-    }
+        //Item.fetchRequest() is the default request, if no data is passed in
+        //"with" is external variable, "response" is internal param
+        //must specify data type of output of this method
 
+        do {
+            itemArray = try context.fetch(request)
+        }
+        catch {
+            print("Error fetching data from persistent data")
+        }
+        tableView.reloadData()
+
+    }
+    
 }
 
+//MARK - search bar methods
+
+extension TodDoListViewController : UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        // query the core data
+        //NSPredicate is a foundation class to query core data
+        //A cheat sheet is on NSpredicate is on the Realm blog at
+        //https://static.realm.io/downloads/files/NSPredicateCheatsheet.pdf?_ga=2.253802632.1639710766.1520325555-232052067.1520325555
+        
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        //[cd] means not case or diacritic sensitive
+        //Sort using the key "title" in ascending order
+        
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending : true)]
+        
+        loadItems(with: request)
+        tableView.reloadData()
+        
+    }
+    
+    
+}
