@@ -14,6 +14,7 @@
 		571C6C27204BF78C00317902 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 571C6C25204BF78C00317902 /* LaunchScreen.storyboard */; };
 		571C6C35204C5D6800317902 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 571C6C34204C5D6800317902 /* Default-568h@2x.png */; };
 		571C6C59204DA17300317902 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 571C6C57204DA17300317902 /* DataModel.xcdatamodeld */; };
+		578E72BA204E98DC0080D942 /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 578E72B9204E98DB0080D942 /* CategoryViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		571C6C28204BF78C00317902 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		571C6C34204C5D6800317902 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		571C6C58204DA17300317902 /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
+		578E72B9204E98DB0080D942 /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CategoryViewController.swift; path = Todooey/Controllers/CategoryViewController.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				571C6C1E204BF78C00317902 /* TodDoListViewController.swift */,
+				578E72B9204E98DB0080D942 /* CategoryViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -177,6 +180,7 @@
 			files = (
 				571C6C1F204BF78C00317902 /* TodDoListViewController.swift in Sources */,
 				571C6C59204DA17300317902 /* DataModel.xcdatamodeld in Sources */,
+				578E72BA204E98DC0080D942 /* CategoryViewController.swift in Sources */,
 				571C6C1D204BF78C00317902 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
