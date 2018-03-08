@@ -49,7 +49,6 @@ class CategoryViewController: SwipeTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         //dequeue what's in the table view already
-        //let cell = super.tableview(tableView, cellForRowAt: indexPath)
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = categories?[indexPath.row].name  ?? "No categories added yet"
 
@@ -150,7 +149,7 @@ class CategoryViewController: SwipeTableViewController {
     }
     
     //MARK: -  Delete Data From Swipe
-    
+    // called from superclass
     override func updateModel(at indexPath: IndexPath) {
         
         if let swipedCategory = self.categories?[indexPath.row] {

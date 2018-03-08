@@ -8,11 +8,10 @@
 
 import UIKit
 import RealmSwift
-import SwipeCellKit
 
-class TodDoListViewController : UITableViewController {
+class TodDoListViewController : SwipeTableViewController {
 
-    //todoItems is an auto-updating container of Realm type Results, which in this case
+    //todoItems is an auto-updating container of type Realm Results, which in this case
     //holds objects of type Item
     var todoItems : Results<Item>?
     
@@ -50,22 +49,23 @@ class TodDoListViewController : UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+ 
+        //THIS IS THE NEW CODE FOR USE WITH THE SUPERCLASS SWIPETABLEVIEWCONTROLLER
+        //dequeue what's in the table view already
+        //let cell = super.tableview(tableView, cellForRowAt: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        //***
-        
-        //todoItems container may be empty (nil), so we need to write code around it to stop it crashing
         if let item = todoItems?[indexPath.row] {
             //if so ...
-            cell.textLabel?.text = item.title 
+            cell.textLabel?.text = item.title
             // value = condition ? valueIfTrue : valueIfFalse
             cell.accessoryType = item.done ? .checkmark : .none
         }
         else {
-            
+
             cell.textLabel?.text = "No item added"
         }
-        
+
         return cell
     }
     
@@ -84,13 +84,14 @@ class TodDoListViewController : UITableViewController {
                     
                     //if we want to delete the selected item, uncomment this line
                     //realm.delete(item)
+                    //In actual fact, doing delete via SwipeCellKit and SwipeTableViewController
                 }
             }
             catch {
                 print ("Error saving done status: \(error)")
             }
         }
-        tableView.reloadData()
+        //tableView.reloadData()
         //tableView.deselectRow(at: indexPath, animated: true)
         
     }
@@ -156,7 +157,25 @@ class TodDoListViewController : UITableViewController {
         tableView.reloadData()
 
     }
-    
+ 
+    //TODO: - modify update model to delete the selected to do ITEM
+    //Called from SwipeTableViewController
+    override func updateModel(at indexPath: IndexPath) {
+        
+        if let itemsToDelete = self.todoItems?[indexPath.row] {
+            //if we have a list of todos items ...
+            do {
+                //and we can write to them
+                try self.realm.write {
+                    self.realm.delete(itemsToDelete)
+                }
+            }
+            catch {
+                print ("Error deleting category: \(error)")
+            }
+        }
+    }
+
 }
 
 //MARK - search bar methods
