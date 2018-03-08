@@ -9,7 +9,10 @@
 import UIKit
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+//implement swipe delete
+//need to add
+
+class CategoryViewController: SwipeTableViewController {
     
     //create a new Realm instance
     let realm = try! Realm()
@@ -29,6 +32,8 @@ class CategoryViewController: UITableViewController {
         //load catgories from context into local container "categories"
         loadCategories()
         
+        tableView.rowHeight = 80
+        
     }
     //MARK - TableView DataSource Methods
     
@@ -44,12 +49,10 @@ class CategoryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         //dequeue what's in the table view already
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        
-        //get the category for that row out of the category array
-        //use nil coalescing operator, so if there are no categories we display the text as below
+        //let cell = super.tableview(tableView, cellForRowAt: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = categories?[indexPath.row].name  ?? "No categories added yet"
-        
+
         return cell
     }
     
@@ -144,6 +147,24 @@ class CategoryViewController: UITableViewController {
             print("Error saving context,  \(error)")
         }
         
+    }
+    
+    //MARK: -  Delete Data From Swipe
+    
+    override func updateModel(at indexPath: IndexPath) {
+        
+        if let swipedCategory = self.categories?[indexPath.row] {
+            //if we have a list of categories items ...
+            do {
+                //and we can write to them
+                try self.realm.write {
+                    self.realm.delete(swipedCategory)
+                }
+            }
+            catch {
+                print ("Error deleting category: \(error)")
+            }
+        }
     }
     
 }
