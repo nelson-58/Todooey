@@ -32,8 +32,6 @@ class CategoryViewController: SwipeTableViewController {
         //load catgories from context into local container "categories"
         loadCategories()
         
-        tableView.rowHeight = 80
-        
     }
     //MARK - TableView DataSource Methods
     

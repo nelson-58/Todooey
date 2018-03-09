@@ -15,6 +15,8 @@ class SwipeTableViewController: UITableViewController,  SwipeTableViewCellDelega
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        //set row height for superclass, which will effect ToDoListVC and CategoryVC
+        tableView.rowHeight = 80
         
     }
     

@@ -51,13 +51,14 @@ class TodDoListViewController : SwipeTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
  
         //THIS IS THE NEW CODE FOR USE WITH THE SUPERCLASS SWIPETABLEVIEWCONTROLLER
-        //dequeue what's in the table view already
-        //let cell = super.tableview(tableView, cellForRowAt: indexPath)
+        //dequeue cell inside super class
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = todoItems?[indexPath.row] {
             //if so ...
             cell.textLabel?.text = item.title
+            
+            //set check mark accessory
             // value = condition ? valueIfTrue : valueIfFalse
             cell.accessoryType = item.done ? .checkmark : .none
         }
@@ -162,12 +163,13 @@ class TodDoListViewController : SwipeTableViewController {
     //Called from SwipeTableViewController
     override func updateModel(at indexPath: IndexPath) {
         
-        if let itemsToDelete = self.todoItems?[indexPath.row] {
+        if let item = self.todoItems?[indexPath.row] {
             //if we have a list of todos items ...
             do {
-                //and we can write to them
+                //and we can write to them in realm
                 try self.realm.write {
-                    self.realm.delete(itemsToDelete)
+                    //define what will be changed inside the realm environment
+                    self.realm.delete(item)
                 }
             }
             catch {
@@ -175,7 +177,6 @@ class TodDoListViewController : SwipeTableViewController {
             }
         }
     }
-
 }
 
 //MARK - search bar methods
